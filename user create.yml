@@ -1,0 +1,14 @@
+---
+- name: Creating group account
+  hosts: all
+  become: true
+  tasks:
+    - name: Creating group admin
+      ansible.builtin.group:
+        name: admin
+        state: present
+
+    - name: Create user account johnd
+      ansible.builtin.user:
+        name: johnd
+        state: present
