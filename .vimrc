@@ -6,3 +6,5 @@ set wrap
 
 
 autocmd Filetype yaml setlocal ts=2 ai cuc cul
+
+This for .vimrc file 
