@@ -1,0 +1,39 @@
+---
+- name: create user a users
+  hosts: all
+  become: yes
+  vars_files:
+    - user_list.yml
+    - locker.yml
+  tasks:
+    - name: create a devops group
+      group:
+        name: devops
+        state: present
+      when: inventory_hostname in groups['dev'] or inventory_hostname in groups['test']
+
+    - name: create opsmgt group
+      group:
+        name: opsmgr
+        state: present
+      when: inventory_hostname in groups['prod']
+
+    - name: create users with developer role
+      user:
+        name: "{{ item.name }}"
+        comment: "{{ item.job }}"
+        password: "{{ pw_developer | password_hash('sha512') }}"
+        groups: devops
+        password_expire_max: 30
+      when: inventory_hostname in groups['dev'] or inventory_hostname in groups['test'] and item.job == "developer"
+      loop: "{{ users }}"
+
+    - name: create users with job description of manager
+      user:
+        name: "{{ item.name }}"
+        comment: "{{ item.job }}"
+        groups: opsmgr
+        password: "{{ pw_manager | password_hash('sha512') }}"
+        password_expire_max: 30
+      when: inventory_hostname in groups['prod'] and item.job == "manager"
+      loop: "{{ users }}"
