@@ -1,0 +1,27 @@
+---
+- name: Install and configure vsftpd
+  hosts: prod
+  become: yes
+  tasks:
+    - name: Install vsftpd pkg
+      yum:
+        name: vsftpd          #yum install -y vsftpd
+        state: latest
+
+    - name: Start and enable service
+      service:
+        name: vsftpd          #systemctl enable --now vsftpd
+        state: started
+        enabled: yes
+
+    - name: Allow ftp traffic
+      firewalld:              #firewall-cmd --add-service=ftp #firewall-cmd --add-service=ftp --permanent
+        service: ftp
+        state: enabled
+        immediate: yes
+        permanent: yes
+
+    - name: create a file in /var/ftp/pub
+      copy:
+        content: "Welcome to FTP Site"
+        dest: /var/ftp/pub/readme
