@@ -1,0 +1,44 @@
+---
+- name: Install and configure webserver
+  hosts: prod
+  become: yes
+  tasks:
+    - name: Install pkgs
+      ansible.builtin.yum:
+        name:
+          - httpd
+          - mariadb-server
+          - mariadb
+          - php
+        state: latest
+
+    - name: Start and enable httpd service
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Start and enable mariadb service
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    - name: Allow in firewall http traffic
+      ansible.posix.firewalld:
+        service: http
+        state: enabled
+        immediate: yes
+        permanent: yes
+
+    - name: Allow in firewall mysql traffic
+      ansible.posix.firewalld:
+        service: mysql
+        state: enabled
+        immediate: yes
+        permanent: yes
+
+    - name: Create a Home Page
+      ansible.builtin.copy:
+        content: "My Website automated by Ansible \n"
+        dest: /var/www/html/index.html
