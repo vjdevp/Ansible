@@ -1,0 +1,37 @@
+---
+users:
+  - name: rob
+    gecos: rob user
+    uid: 6001
+  - name: smith
+    gecos: smith user
+    uid: 6002
+[root@workstation day9]# cat webserver_magic_var.yml
+---
+- name: Install and configure webserver
+  hosts: prod
+  become: yes
+  tasks:
+    - name: Install pkgs
+      ansible.builtin.yum:
+        name:
+          - httpd
+        state: latest
+
+    - name: Start and enable service
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Allow in firewall
+      ansible.posix.firewalld:
+        service: http
+        state: enabled
+        immediate: yes
+        permanent: yes
+
+    - name: Create a Home Page
+      ansible.builtin.copy:
+        content: "Web Server Running With name {{ inventory_hostname }} \n"
+        dest: /var/www/html/index.html
