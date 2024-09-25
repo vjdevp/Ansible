@@ -1,0 +1,8 @@
+---
+- name: Set Selinux
+  hosts: all
+  become: yes
+  vars:
+    selinux_state: enforcing
+  roles:
+    - redhat.rhel_system_roles.selinux
