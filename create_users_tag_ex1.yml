@@ -1,0 +1,27 @@
+---
+- name: create users
+  hosts: all
+  become: yes
+  vars_files:
+    - users.yml
+  tasks:
+    - name: create users from vars file
+      user:
+        name: "{{ item.name }}"
+        comment: "{{ item.job }}"
+        uid: "{{ item.uid }}"
+        password_expire_max: "{{ item.maxage }}"
+      loop: "{{ users }}"
+     # when: ansible_fqdn in groups['prod'] or ansible_hostname == 'servera'
+      when: ansible_fqdn in groups['prod']
+      tags: testing
+
+    - name: create users from vars file
+      user:
+        name: "{{ item.name }}"
+        comment: "{{ item.job }}"
+        uid: "{{ item.uid }}"
+        password_expire_max: "{{ item.maxage }}"
+      loop: "{{ users }}"
+      when: inventory_hostname in groups['dev']
+      tags: development
