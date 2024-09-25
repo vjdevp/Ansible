@@ -1,0 +1,57 @@
+---
+- name: facts to collect
+  hosts: serverb.lab.example.com
+  become: yes
+  tasks:
+    - name: print using debug
+      debug:
+        var: ansible_facts
+[root@workstation day9]# cat ansible_facts_setup.yml
+---
+- name: facts to collect
+  hosts: serverb.lab.example.com
+  become: yes
+  tasks:
+    - name: print using debug
+      debug:
+        var: ansible_facts
+[root@workstation day9]# cat myusers_nested.yml
+---
+users:
+  rob:
+    name: rob
+    gecos: rob user
+    uid: 6001
+  smith:
+    name: smith
+    gecos: smith user
+    uid: 6002
+[root@workstation day9]# cat webserver.yml
+---
+- name: Install and configure webserver
+  hosts: prod
+  become: yes
+  tasks:
+    - name: Install pkgs
+      ansible.builtin.yum:
+        name:
+          - httpd
+        state: latest
+
+    - name: Start and enable service
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Allow in firewall
+      ansible.posix.firewalld:
+        service: http
+        state: enabled
+        immediate: yes
+        permanent: yes
+
+    - name: Create a Home Page
+      ansible.builtin.copy:
+        content: "Web Server Running With name {{ ansible_fqdn }} on {{ ansible_default_ipv4.address }} with vda3 size {{ ansible_devices.vda.partitions.vda3.size }} \n"
+        dest: /var/www/html/index.html
