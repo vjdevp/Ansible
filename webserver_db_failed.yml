@@ -1,0 +1,51 @@
+---
+- name: Install and configure webserver
+  hosts: prod
+  become: yes
+  force_handlers: yes
+  tasks:
+    - name: Install pkgs
+      ansible.builtin.yum:
+        name:
+          - httpd
+          - mariadb-server
+          - php
+          - mariadb
+        state: latest
+
+    - name: Start and enable service
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - httpd
+        - mariadb
+
+    - name: Create a Home Page
+      ansible.builtin.copy:
+        content: "My Website with db force handlers  is automated by Ansible \n"
+        dest: /var/www/html/index.html
+      notify:
+        - restart httpd
+        - restart mariadb
+
+    - name: Allow in firewall
+      ansible.posix.firewalld:
+        service: "{{ item }}"
+        state: enabled
+        immediate: yes
+        permanent: yes
+      loop:
+        - httpid
+        - mysqld
+
+  handlers:
+    - name: restart httpd
+      service:
+        name: httpd
+        state: restarted
+    - name: restart mariadb
+      service:
+        name: mariadb
+        state: restarted
